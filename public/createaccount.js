@@ -1,0 +1,93 @@
+function CreateAccount(){
+  const [show, setShow]     = React.useState(true);
+  const [status, setStatus] = React.useState('');
+  
+  const handleAccountCreated = async () => {
+    console.log('Account created!');
+
+   
+    try {
+      const response = await fetch('/account/all');
+      const updatedData = await response.json();
+      console.log('Updated Data:', updatedData);
+    } catch (error) {
+      console.error('Error fetching updated data:', error);
+    }
+  };
+
+  return (
+    <Card
+      bgcolor="primary"
+      header="Create Account"
+      width="300px"
+      status={status}
+      body={show ?
+        <CreateForm setShow={setShow} onAccountCreated={handleAccountCreated} /> :
+        <CreateMsg setShow={setShow}/>}
+    />
+  )
+}
+
+function CreateMsg(props){
+  return(<>
+    <h5>Success</h5>
+    <button type="submit" 
+      className="btn btn-light" 
+      onClick={() => props.setShow(true)}>Add another account</button>
+  </>);
+}
+
+function CreateForm(props){
+  const [name, setName]         = React.useState('');
+  const [email, setEmail]       = React.useState('');
+  const [password, setPassword] = React.useState('');
+
+  function handle(){
+    console.log(name,email,password);
+
+    fetch(`/account/create/${name}/${email}/${password}`)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+        return response.json();
+      })
+      .then(data => {
+        console.log(data);  
+        props.setShow(false); 
+        props.onAccountCreated();
+      })
+      .catch(error => {
+        console.error('Error creating account:', error);
+      });
+  }
+
+  return (<>
+
+    Name<br/>
+    <input type="input" 
+      className="form-control" 
+      placeholder="Enter name" 
+      value={name} 
+      onChange={e => setName(e.currentTarget.value)} /><br/>
+
+    Email address<br/>
+    <input type="input" 
+      className="form-control" 
+      placeholder="Enter email" 
+      value={email} 
+      onChange={e => setEmail(e.currentTarget.value)}/><br/>
+
+    Password<br/>
+    <input type="password" 
+      className="form-control" 
+      placeholder="Enter password" 
+      value={password} 
+      onChange={e => setPassword(e.currentTarget.value)}/><br/>
+
+    <button type="submit" 
+      className="btn btn-light" 
+      onClick={handle}>Create Account</button>
+
+  </>);
+}
